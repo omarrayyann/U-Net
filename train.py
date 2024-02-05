@@ -4,9 +4,9 @@ from albumentations.pytorch import ToTensorV2
 from tqdm import tqdm
 import torch.nn as nn
 import torch.optim as optim
-from model import UNet
+from unet_model import UNet
 
-from utils import (
+from unit_utils import (
     load_checkpoint,
     save_checkpoint,
     get_loaders,
@@ -27,7 +27,7 @@ TRAIN_IMG_DIR = "dataset/train_images/"
 TRAIN_MASK_DIR = "dataset/train_masks/"
 VAL_IMG_DIR = "dataset/val_images/"
 VAL_MASK_DIR = "dataset/val_masks"
-
+LOAD_MODEL = True
 
 def train_fn(model, loader, optimizer, loss_fn, scaler):
 
@@ -89,6 +89,10 @@ def main():
         PIN_MEMORY,
     )
 
+    if LOAD_MODEL:
+        load_checkpoint(torch.load("checkpoints/my_checkpoint.pth.tar", map_location=torch.device('cpu')), model)
+
+    check_accuracy(val_loader, model, device=DEVICE)
     scaler = torch.cuda.amp.GradScaler()
 
     for epoch in range(NUM_EPOCHS):
